@@ -91,7 +91,7 @@ for(ii in nams){
   plot(rast, col = hcl.colors(100, "terrain"))
 }
 
-# Save each grid point weather data into separate .RData files to avoid loading a massive object
+# Save each grid point weather data into separate .RData files to avoid loading a single massive object
 for(ii in 1:length(all_w_data)){
   tmp <- all_w_data[[ii]][ , c("datetime", "u10", "v10", "u100", "v100")]
   rownames(tmp) <- NULL
