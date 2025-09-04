@@ -75,3 +75,7 @@ region_ave <- function(region, path_to_wind_data) {
 
 path_to_wind_data <- "./Wind_data/Processed_weather_data"
 
+PACA_wind_data <- region_ave(PACA, path_to_wind_data)
+
+
+
