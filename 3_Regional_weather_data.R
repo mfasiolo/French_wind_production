@@ -47,10 +47,10 @@ ggplot() +
   theme_minimal()
 
 
-# function to search for wind_data files for points fall in a particular region and average u10, v10, u100, and v100 for each time stamp.
+# function to search for wind_data files for points fall in a particular region
 # Input: region that you are interested in, path to wind_data i.e. "./Wind_data/Processed_weather_data/"
-
-# coord is a data set contains index, lon and lat
+# coord is a data set contains columns: index, lon and lat
+# if exact_region=FALSE, it uses points inside the smallest rectangle that includes the region
 regional_all_data <- function(region, path_to_wind_data, coord, exact_region = TRUE){
   grid_sf <- st_as_sf(coord, coords = c("lon", "lat"), crs = 4326)
   if(exact_region == TRUE){
@@ -66,6 +66,7 @@ regional_all_data <- function(region, path_to_wind_data, coord, exact_region = T
   return(list_regional_data)
 }
 
+# Given the list of files found for the region, compute average u10, v10, u100, and v100 for each time stamp and output a regional average data
 region_ave <- function(list_regional_data, use_weights = FALSE, weights = NULL){
   if (use_weights == TRUE && is.null(weights)) {
     stop("To use weighted average, you must provide a 'weights' vector.")
@@ -92,17 +93,14 @@ region_ave <- function(list_regional_data, use_weights = FALSE, weights = NULL){
   return(averaged_df)
 }
 
-path_to_wind_data <- "./Wind_data/Processed_weather_data"
-
-list_regional_data <- regional_all_data(frpac_region, path_to_wind_data,coord)
-PACA_wind_data <- region_ave(list_regional_data)
-
 
 library(readr)
 
 output_dir <- "Wind_data/Regional_wind_data"
 dir.create(output_dir, showWarnings = FALSE, recursive = TRUE)
 
+# loop over 12 France regions (exclude Corse) and save a data frame for each region
+# we ensure that file names are consistent with prod data column names
 for (region_name in france_data$name) {
   # skip Corse region
   if (region_name == "Corse") {
@@ -113,7 +111,6 @@ for (region_name in france_data$name) {
   list_regional_data <- regional_all_data(current_region_sf, path_to_wind_data, coord)
   averaged_wind_data <- region_ave(list_regional_data)
   
-  # file name consistant with prod data
   if (region_name == "Provence Alpes Côte d'Azu") {
     file_name <- "PACA_wind_data.csv"
   } else if (region_name == "Île de France") {
