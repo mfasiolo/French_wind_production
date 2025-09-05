@@ -13,10 +13,10 @@ source("R/weather_data_funcs.R")
 # [1] Load and process data from the .nc files
 ################
 
-setwd("~/Desktop/All/Dropbox/Work/Projects/Data/EDF_Wind")
+# setwd("~/Desktop/All/Dropbox/Work/Projects/Data/EDF_Wind")
 
 # Obtain long and lat coordinates of gridded weather forecast
-file <- "Wind_data/HRES_France/2018/CEP0125.201801010000.nc"
+file <- "Wind_data/HRES_France/CEP0125.201801010000.nc"
 nc <- nc_open(file , write = FALSE)
 longitude <- ncvar_get(nc , "longitude") 
 latitude <- ncvar_get(nc , "latitude")  
@@ -61,7 +61,7 @@ clusterEvalQ(NULL, {
 })
 
 nwf <- parLapply(NULL, 1:ngrid, function(ii){
-  out <- get_weather_1_location_all_years(geo_grid_idx[ii, 1], geo_grid_idx[ii, 2], year = 2018:2022) 
+  out <- get_weather_1_location_all_years(geo_grid_idx[ii, 1], geo_grid_idx[ii, 2], years = 2018:2022) 
   return(out)
 })
 
