@@ -61,7 +61,7 @@ clusterEvalQ(NULL, {
 })
 
 nwf <- parLapply(NULL, 1:ngrid, function(ii){
-  out <- get_weather_1_location_all_years(geo_grid_idx[ii, 1], geo_grid_idx[ii, 2], years = 2018:2022) 
+  out <- get_weather_1_location_all_years(geo_grid_idx[ii, 1], geo_grid_idx[ii, 2], years = 2018:2023) 
   return(out)
 })
 
