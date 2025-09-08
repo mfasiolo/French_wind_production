@@ -1,7 +1,7 @@
 
 
 # For each year in "years", get all next day forecasts for one grid point
-get_weather_1_location_all_years <- function(index_lon, index_lat, years) {
+get_weather_1_location_all_years <- function(index_lon, index_lat, years, min_step = 24) {
   
   files <- sapply(
     years, 
@@ -22,7 +22,7 @@ get_weather_1_location_all_years <- function(index_lon, index_lat, years) {
   for (i in 1:length(files)) {
     nc <- nc_open(paste0("Wind_data/HRES_France/", files[i]), write = FALSE)
     df <- get_weather_1_location_1_day(nc, index_lon, index_lat, start_dates[i]) |> 
-      filter(step >= 24 & step < 48)
+      filter(step >= min_step & step < min_step + 24)
     list_of_forecasts[[i]] <- df
     nc_close(nc)
   }
