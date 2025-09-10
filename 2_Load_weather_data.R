@@ -24,7 +24,8 @@ my_dat <- lapply(my_grid$index, function(ii){
 
 # Convert list into a single data frame containing all the data
 n <- nrow(my_dat[[1]])
-big_dat <- data.frame("u10" = rep(NA, n), "v10" = rep(NA, n), "u100" = rep(NA, n), "v100" = rep(NA, n))
+big_dat <- data.frame("date" = my_dat[[1]]$date,
+                      "u10" = rep(NA, n), "v10" = rep(NA, n), "u100" = rep(NA, n), "v100" = rep(NA, n))
 nams <- c("u10", "v10", "u100", "v100")
 for(ii in nams){
   cat(".")
