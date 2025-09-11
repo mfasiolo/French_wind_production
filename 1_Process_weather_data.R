@@ -6,6 +6,7 @@ library(lubridate)
 library(raster)
 library(parallel)
 library(abind)
+library(dplyr)
 
 source("R/weather_data_funcs.R")
 
@@ -13,10 +14,10 @@ source("R/weather_data_funcs.R")
 # [1] Load and process data from the .nc files
 ################
 
-setwd("~/Desktop/All/Dropbox/Work/Projects/Data/EDF_Wind")
+# setwd("~/Desktop/All/Dropbox/Work/Projects/Data/EDF_Wind")
 
 # Obtain long and lat coordinates of gridded weather forecast
-file <- "Wind_data/HRES_France/2018/CEP0125.201801010000.nc"
+file <- "Wind_data/HRES_France/CEP0125.201801010000.nc"
 nc <- nc_open(file , write = FALSE)
 longitude <- ncvar_get(nc , "longitude") 
 latitude <- ncvar_get(nc , "latitude")  
@@ -60,8 +61,9 @@ clusterEvalQ(NULL, {
   source("R/weather_data_funcs.R")
 })
 
+# loop over all grid points to get weather time series
 nwf <- parLapply(NULL, 1:ngrid, function(ii){
-  out <- get_weather_1_location_all_years(geo_grid_idx[ii, 1], geo_grid_idx[ii, 2], year = 2018:2022) 
+  out <- get_weather_1_location_all_years(geo_grid_idx[ii, 1], geo_grid_idx[ii, 2], years = 2018:2023) 
   return(out)
 })
 
@@ -72,13 +74,24 @@ stopCluster(cl)
 # Note that the interpolation is quite crude around midnight because we have predictions from 1am to 11pm, 
 # which we interpolate to get 11:30pm, 12am and 12:30am (so the width of the interpolation interval is 2hour, rather
 # than 2 as during the rest of the day). We could do better but we are being lazy.
-all_w_data <- lapply(1:nrow(geo_grid), function(ii){
+all_w_data <- lapply(1:ngrid, function(ii){
+  # weather data for one location
   weather_dat <- nwf[[ii]]
-  hhdt <- seq(from = weather_dat$datetime[1], to = weather_dat$datetime[nrow(weather_dat)], by = "30 min")
-  hh_data <- dplyr::left_join(data.frame(datetime = hhdt), weather_dat, by = "datetime")
-  hh_zoo <- zoo(hh_data[,-1], hh_data$datetime)
-  hh_zoo <- na.approx(hh_zoo)
-  hh_data <- data.frame(hh_zoo, datetime = hh_data$datetime)
+  
+  # get quarter hourly times
+  qhdt <- seq(from = weather_dat$datetime[1], to = weather_dat$datetime[nrow(weather_dat)], by = "15 min")
+  qh_data <- dplyr::left_join(data.frame(datetime = qhdt), weather_dat, by = "datetime")
+  
+  # interpolate for quarter hourly forecasts
+  qh_data <- zoo(qh_data[,-1], qh_data$datetime) |> 
+    na.approx() |> 
+    data.frame(datetime = qh_data$datetime)
+  
+  # filter for 15 and 45 past forecasts, then set times to 15 mins before to
+  # align with production data
+  hh_data <- qh_data |> 
+    filter(minute(datetime) %in% c(15, 45)) |> 
+    mutate(datetime = datetime - minutes(15))
   return(hh_data)
 })
 

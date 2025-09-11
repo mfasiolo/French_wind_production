@@ -1,35 +1,44 @@
 
 
-# For each year in "year", get all intraday forecasts for one grid point
-get_weather_1_location_all_years <- function(index_lon, index_lat, year) {
-  list_of_df <- list()
-  for (i in 1:length(year)) {
-    list_of_df[[i]] <- get_weather_1_location_1_year(year[i], index_lon, index_lat)
-  }
-  out <- do.call("rbind", list_of_df)
-  return(out)
-}
-
-# For each year, get all intraday forecasts (step < 24) for one grid point
-# Note: we'll get 23 forecasts from 1am to 11pm. We do NOT get a midnight forecast, we'll get by interpolation.
-# (one could do things better)
-get_weather_1_location_1_year <- function(year, index_lon, index_lat) {
+# For each year in "years", get all next day forecasts for one grid point
+get_weather_1_location_all_years <- function(index_lon, index_lat, years, min_step = 24) {
   
-  files <- list.files(paste0("Wind_data/HRES_France/", year))
+  # get all file names corresponding to years specified
+  # and sort so they correspond to date-time order
+  files <- sapply(
+    years, 
+    \(y) list.files("Wind_data/HRES_France", pattern = paste0("CEP0125.", y))
+  ) |> 
+    unlist() |> 
+    sort()
+  
   list_of_forecasts <- list()
-  start_dates <- as_datetime(seq(as.Date(paste0(year, "-01-01")), as.Date(paste0(year, "-12-31")), by="day"))
   
-  # Loop over files containing forecasts for each day, for the chosen year
+  # loop over all dates within years
+  start_dates <- seq(
+    as.Date(paste0(min(years),"-01-01")), 
+    as.Date(paste0(max(years),"-12-31")), 
+    by="day"
+  ) |> 
+    as_datetime()
+  
+  # Files and start times might be misaligned if some are missing
+  if (length(files) != length(start_dates)) stop("Files don't cover whole date range")
+  
+  # Loop over files containing forecasts for each day
+  # Should loop over all date-times 
   for (i in 1:length(files)) {
-    nc <- nc_open(paste0("Wind_data/HRES_France/", year,"/",files[i]), write = FALSE)
-    df <- get_weather_1_location_1_day(nc, index_lon, index_lat, start_dates[i])
-    df <- df[df$step < 24,]
+    # open file corresponding to date-time i
+    nc <- nc_open(paste0("Wind_data/HRES_France/", files[i]), write = FALSE)
+    
+    # get weather forecasts from date_time + min_step to 24 hours later
+    df <- get_weather_1_location_1_day(nc, index_lon, index_lat, start_dates[i]) |> 
+      filter(step >= min_step & step < min_step + 24)
     list_of_forecasts[[i]] <- df
     nc_close(nc)
   }
   
   out <- do.call("rbind", list_of_forecasts)
-  
   return(out)
 }
 
