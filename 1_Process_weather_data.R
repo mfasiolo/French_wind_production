@@ -61,6 +61,7 @@ clusterEvalQ(NULL, {
   source("R/weather_data_funcs.R")
 })
 
+# loop over all grid points to get weather time series
 nwf <- parLapply(NULL, 1:ngrid, function(ii){
   out <- get_weather_1_location_all_years(geo_grid_idx[ii, 1], geo_grid_idx[ii, 2], years = 2018:2023) 
   return(out)
@@ -74,12 +75,20 @@ stopCluster(cl)
 # which we interpolate to get 11:30pm, 12am and 12:30am (so the width of the interpolation interval is 2hour, rather
 # than 2 as during the rest of the day). We could do better but we are being lazy.
 all_w_data <- lapply(1:ngrid, function(ii){
+  # weather data for one location
   weather_dat <- nwf[[ii]]
+  
+  # get quarter hourly times
   qhdt <- seq(from = weather_dat$datetime[1], to = weather_dat$datetime[nrow(weather_dat)], by = "15 min")
   qh_data <- dplyr::left_join(data.frame(datetime = qhdt), weather_dat, by = "datetime")
+  
+  # interpolate for quarter hourly forecasts
   qh_data <- zoo(qh_data[,-1], qh_data$datetime) |> 
     na.approx() |> 
     data.frame(datetime = qh_data$datetime)
+  
+  # filter for 15 and 45 past forecasts, then set times to 15 mins before to
+  # align with production data
   hh_data <- qh_data |> 
     filter(minute(datetime) %in% c(15, 45)) |> 
     mutate(datetime = datetime - minutes(15))
