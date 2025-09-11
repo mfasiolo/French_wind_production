@@ -3,14 +3,18 @@
 # For each year in "years", get all next day forecasts for one grid point
 get_weather_1_location_all_years <- function(index_lon, index_lat, years, min_step = 24) {
   
+  # get all file names corresponding to years specified
+  # and sort so they correspond to date-time order
   files <- sapply(
     years, 
     \(y) list.files("Wind_data/HRES_France", pattern = paste0("CEP0125.", y))
   ) |> 
-    unlist()
+    unlist() |> 
+    sort()
   
   list_of_forecasts <- list()
   
+  # loop over all dates within years
   start_dates <- seq(
     as.Date(paste0(min(years),"-01-01")), 
     as.Date(paste0(max(years),"-12-31")), 
@@ -18,9 +22,16 @@ get_weather_1_location_all_years <- function(index_lon, index_lat, years, min_st
   ) |> 
     as_datetime()
   
+  # Files and start times might be misaligned if some are missing
+  if (length(files) != length(start_dates)) stop("Files don't cover whole date range")
+  
   # Loop over files containing forecasts for each day
+  # Should loop over all date-times 
   for (i in 1:length(files)) {
+    # open file corresponding to date-time i
     nc <- nc_open(paste0("Wind_data/HRES_France/", files[i]), write = FALSE)
+    
+    # get weather forecasts from date_time + min_step to 24 hours later
     df <- get_weather_1_location_1_day(nc, index_lon, index_lat, start_dates[i]) |> 
       filter(step >= min_step & step < min_step + 24)
     list_of_forecasts[[i]] <- df

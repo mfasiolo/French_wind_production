@@ -6,6 +6,7 @@ library(lubridate)
 library(raster)
 library(parallel)
 library(abind)
+library(dplyr)
 
 source("R/weather_data_funcs.R")
 
