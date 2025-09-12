@@ -25,7 +25,7 @@ combine_data <- function(region, weather_data) {
 
 
 
-# Function input region
+# Function to output combined production and regional weather averages given just  region
 load_region_ave <- function(region) {
   # load regional weather data
   region_file_name <- gsub("-", ".", gsub(" ", ".", region))
