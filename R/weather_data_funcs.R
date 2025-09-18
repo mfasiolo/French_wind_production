@@ -47,7 +47,7 @@ get_weather_1_location_all_years <- function(index_lon, index_lat, years, min_st
 # Get weather forecast from one grid point, for one day (one .nc file) at all available lead times ("step")
 get_weather_1_location_1_day <- function(nc, index_lon, index_lat, start_date) {
 
-  step = ncvar_get(nc , "step")
+  step <- 1:48 #ncvar_get(nc , "step")
   
   # Wind speed 10m
   u10 <- ncvar_get(nc , "u10" , c(index_lon, index_lat, 1), c(1, 1, length(step)))
