@@ -22,7 +22,7 @@ GE_dat$direction100 <- atan2(GE_dat$u100, GE_dat$v100) + 180 / pi + 180
 
 names(GE_dat)
 
-form1 <- prod_div_cap ~ s(toy, bs = "cc", k = 5) + s(tod, bs = "cc", k = 10) + capacity +
+form1 <- prod_div_cap ~ s(toy, bs = "cc", k = 5) + s(tod, bs = "cc", k = 10) +
   s(windspeed100) + s(direction100, bs = "cc")
 
 gam_fit1 <- bam(
