@@ -2,6 +2,7 @@ library(mgcv)
 library(mgcViz)
 library(readr)
 library(lubridate)
+library(dplyr)
 source("R/combine_data_funcs.R")
 
 GE_dat <- load_region_ave("Grand Est")
@@ -23,12 +24,16 @@ GE_dat$direction100 <- atan2(GE_dat$u100, GE_dat$v100) + 180 / pi + 180
 names(GE_dat)
 
 form1 <- prod_div_cap ~ s(toy, bs = "cc", k = 5) + s(tod, bs = "cc", k = 10) +
-  s(windspeed100) + s(direction100, bs = "cc")
+  s(capacity) + 
+  s(windspeed10) + s(direction10) + ti(windspeed10, direction10) + 
+  s(windspeed100) + s(direction100) + ti(windspeed100, direction100) + 
+  ti(windspeed10, windspeed100)
 
 gam_fit1 <- bam(
   form1,
   data = GE_dat,
   discrete = TRUE,
+  family = scat,
   argGam = list(knots=list(tod=seq(0,24,length=9)))
 ) |>
   getViz()
@@ -36,6 +41,8 @@ gam_fit1 <- bam(
 print(plot(gam_fit1, allTerms = TRUE), pages = 1)
 
 summary(gam_fit1)
+
+plotRGL(sm(gam_fit1, 9))
 
 preds <- predict(gam_fit1, type = "response")
 
