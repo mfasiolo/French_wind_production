@@ -5,6 +5,8 @@ library(tibble)
 library(ggplot2)
 load("Geo_data/coordinates.RData")
 
+path_to_wind_data <- "~/Desktop/All/Dropbox/Work/Projects/Data/EDF_Wind/Wind_data/Processed_weather_data"
+
 file_path <- "./Geo_data/fr.json"
 
 target_id <- "FRPAC" # PACA region
