@@ -35,7 +35,7 @@ print(plot(gam_fit, allTerms = TRUE), pages = 1)
 
 resids_mat <- get_resids_mat(GE_convex, gam_fit)
 
-qq.gam(gam_fit, rep = 1)
+qq.gamVizViz(gam_fit, rep = 1)
 
 ##########################
 # log-link
@@ -53,7 +53,7 @@ print(plot(ll_fit, allTerms = TRUE), pages = 1)
 
 resids_mat <- get_resids_mat(GE_convex, ll_fit)
 
-qq.gam(ll_fit, rep = 1)
+qq.gamViz(ll_fit, rep = 1)
 
 
 
@@ -73,7 +73,7 @@ print(plot(scat_fit, allTerms = TRUE), pages = 1)
 
 resids_mat <- get_resids_mat(GE_convex, scat_fit)
 
-qq.gam(scat_fit, rep = 1)
+qq.gamViz(scat_fit, rep = 1)
 
 ##########################
 # scat log-link
@@ -91,7 +91,7 @@ print(plot(ll_scat_fit, allTerms = TRUE), pages = 1)
 
 resids_mat <- get_resids_mat(GE_convex, ll_scat_fit)
 
-qq.gam(ll_scat_fit, rep = 1)
+qq.gamViz(ll_scat_fit, rep = 1)
 
 
 
@@ -153,7 +153,7 @@ x11()
 print(plot(ncv_fit, allTerms = TRUE), pages = 1)
 
 # save(ncv_fit, file = "temp/ncv_GE_convex_fit_sample_1000.RData")
-
+load("temp/ncv_GE_convex_fit_sample_100.RData")
 
 
 compare_fit <- bam(
@@ -168,6 +168,6 @@ print(plot(compare_fit, allTerms = TRUE), pages = 1)
 
 
 
-qq.gam(ncv_fit, rep = 1)
-qq.gam(compare_fit, rep = 1)
+qq.gamViz(ncv_fit, rep = 1)
+qq.gamViz(compare_fit, rep = 1)
 AIC(ncv_fit, compare_fit)
