@@ -35,7 +35,7 @@ print(plot(gam_fit, allTerms = TRUE), pages = 1)
 
 resids_mat <- get_resids_mat(GE_convex, gam_fit)
 
-qq.gamVizViz(gam_fit, rep = 1)
+qq.gamViz(gam_fit, rep = 1)
 
 ##########################
 # log-link
@@ -171,3 +171,29 @@ print(plot(compare_fit, allTerms = TRUE), pages = 1)
 qq.gamViz(ncv_fit, rep = 1)
 qq.gamViz(compare_fit, rep = 1)
 AIC(ncv_fit, compare_fit)
+
+
+
+################### resids function #########################
+
+# load chosen data
+dat <- read_csv("temp/convex_hull_reg_ave/Grand.Est_wind_data 1.csv",
+                      locale = locale(tz = "UTC"))
+
+# specify region
+region <- "Grand Est"
+
+# specify family, e.g.
+
+family <- gaussian()
+# or
+family <- scat(link = "log")
+
+# specify format
+format <- "mat" # or "vec"
+
+# get resids matrix
+resids_mat <- basic_fit_resids(dat, region, family, format)
+
+resids_mat
+
